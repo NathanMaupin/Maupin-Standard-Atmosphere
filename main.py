@@ -69,4 +69,4 @@ while match:  # Sets initial constraints for calling function
     if alt[count] <= h < alt[count + 1]:
         calculator(a_list[count], temp_list[count], alt[count], h)
         match = False  # Breaks loop if conditions met
-    count = count + 1 # Continues loop
+    count = count + 1
