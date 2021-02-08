@@ -1,5 +1,8 @@
 # Outputs Temp (R), Pressure (lb/ft^2), Density (slugs/ft^3), Speed of sound (ft/s)
 from math import e
+import csv
+
+saveFile = open('atmos.txt', 'w')
 
 r = 20925000  # radius of Earth
 g = 32.2  # Earth's gravity in ft/s^2
@@ -9,6 +12,8 @@ alt = [0, 36089.2, 82021, 154199, 173885, 259186]
 temp_list = [518.69, 389.09, 508.79]
 ps = 2116.2
 ds = 0.002377
+it_alt = 0
+in_out = 0
 
 
 def calculator(a, t0, h0, h1):  # Function for general formulas for a, Temp, Pressure, Density, and Speed of Sound
@@ -25,7 +30,7 @@ def calculator(a, t0, h0, h1):  # Function for general formulas for a, Temp, Pre
     while h1 > alt[grad_step + 1]:  # If inputted height greater than upper constraint of gradient/isothermal region
 
         t = t0_mod + a_list[grad_step] * (
-                    h1point - h0point)  # Calculating temp for either gradient or isothermal region
+                h1point - h0point)  # Calculating temp for either gradient or isothermal region
 
         if a_list[grad_step] != 0:  # Checks if region is a gradient or isothermal
             p = p0 * (t / t0_mod) ** (-g / a_list[grad_step] / R)
@@ -53,9 +58,17 @@ def calculator(a, t0, h0, h1):  # Function for general formulas for a, Temp, Pre
         d = d0 * e ** ((-1 * (g / R / t)) * (h1point - h0point))
 
     # Final Outputs of a given altitude
-    print("Temperature: ", t, "R")
-    print("Pressure: ", p, " lb/ft^2")
-    print("Density: ", d, " slugs/ft^3")
+
+    if match:
+        print("Temperature: ", t, "R", ", ", "Pressure: ", p, "lb/ft^2", ", ", "Density: ", d, "slugs/ft^3")
+    talt = str(it_alt)
+    tt = str(round(t, 2))
+    tp = str(round(p, 2))
+    td = str(round(d, 7))
+    txt_out = talt + ", " + tt + ", " + tp + ", " + td + "\n"
+    saveFile = open('atmos.txt', 'a')
+    saveFile.write(txt_out)
+    saveFile.close()
 
 
 # User inputs a Geometric Altitude
@@ -65,8 +78,13 @@ h = (r / (r + hg)) * hg  # Geometric Altitude converted to Geopotential Altitude
 
 count = 0
 match = True
+
 while match:  # Sets initial constraints for calling function
     if alt[count] <= h < alt[count + 1]:
         calculator(a_list[count], temp_list[count], alt[count], h)
         match = False  # Breaks loop if conditions met
     count = count + 1
+
+while it_alt <= 100000:
+    calculator(a_list[count], temp_list[count], alt[count], it_alt)
+    it_alt = it_alt + 500
